@@ -21,7 +21,19 @@ const userSchema = new Schema({
     avatar: {
         type: String,
         default: ''
-    }
+    },
+    nickname: {
+        type: String,
+        default: '' + Date.now()
+    },
+    phone: {
+        type: Number,
+        match: /^1[2-9]\d{9}/
+    },
+    article: [{
+        type: Schema.Types.ObjectID,
+        ref: 'article'
+    }]
 });
 
 module.exports = userSchema;

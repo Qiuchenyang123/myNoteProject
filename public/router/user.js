@@ -1,47 +1,89 @@
 const express = require('express');
 const path = require('path');
 const userModel = require('../data/model/user');
+// 用于验证码
+const svgCaptcha = require("svg-captcha");
+// 使用方法： svgCaptcha.create()
 
 const router = express.Router();
 
 /*
 * code: 0——失败，1——成功
-* errMsg： 错误信息
+* msg： 错误信息
 * data： 数据
-* msg： 返回信息
 * */
+// 获取验证码
+router.get('/verificationCode', (req, res) => {
+    const captcha = svgCaptcha.create();
+    req.session.verificationCode = captcha.text.toLocaleLowerCase();
+    res.send({
+        code: 1,
+        msg: '',
+        data: {
+            svg: captcha.data
+        }
+    })
+});
 // 注册用户
 router.post('/register', (req, res) => {
-    const {email, password, nickname, phone, avatar} = req.body;
+    const {email, password, avatar, nickname, phone} = req.body;
+    let verificationCode = req.body.verificationCode;
+    verificationCode = verificationCode ? verificationCode.toLocaleLowerCase() : verificationCode;
+    if (verificationCode !== req.session.verificationCode) {
+        const captcha = svgCaptcha.create();
+        req.session.verificationCode = captcha.text.toLocaleLowerCase();
+        res.send({
+            code: 0,
+            errMsg: 'verificationCodeError',
+            msg: '验证码错误',
+            data: {
+                svg: captcha.data
+            }
+        })
+    }
+    console.log(46, email, password, avatar, nickname, phone);
+    if (!email || !password) {
+        const captcha = svgCaptcha.create();
+        req.session.verificationCode = captcha.text.toLocaleLowerCase();
+        res.send({
+            code: 0,
+            msg: '邮箱和密码是必须的',
+            data: {
+                svg: captcha.data
+            }
+        })
+    }
     userModel
         .findOne({email})
         .then((data) => {
             if (data) {
+                const captcha = svgCaptcha.create();
+                req.session.verificationCode = captcha.text.toLocaleLowerCase();
                 res.send({
                     code: 0,
-                    errMsg: '用户名已被注册。'
+                    msg: '邮箱已被注册。',
+                    data: {
+                        svg: captcha.data
+                    }
                 })
             } else {
                 userModel
                     .create({
                         email,
                         password,
+                        avatar,
                         nickname,
                         phone,
-                        avatar
+                        verificationCode
                     })
                     .then(() => {
                         res.send({
                             code: 1,
-                            msg: '创建成功'
+                            msg: '注册成功'
                         })
                     })
                     .catch(err => {
-                        console.log('创建用户错误：' + err);
-                        res.send({
-                            code: 0,
-                            errMsg: '创建失败'
-                        })
+                        console.log('创建用户错误：' + err)
                     })
             }
         })
@@ -52,47 +94,10 @@ router.post('/register', (req, res) => {
 
 // 修改用户信息(除了用户名)
 router.post('/update', (req, res) => {
-    const { email, password, nickname, phone, avatar } = req.body;
+    const { email, password, avatar } = req.body;
     userModel
-        .updateOne({ email }, { password, nickname, phone, avatar })
+        .updateOne({ email }, { password, avatar })
         .then(() => {})
-});
-
-router.post('/login', (req, res) => {
-    const { email, password } = req.body;
-    userModel
-        .findOne({ email })
-        .then((data) => {
-            if (data.password === password) {
-                if (data.status === 1) {
-                    res.send({
-                        code: 1,
-                        success: true,
-                        msg: '登录成功'
-                    });
-                    req.session.login = true
-                } else {
-                    res.send({
-                        code: 1,
-                        success: true,
-                        msg: '登录失败，账号未启用'
-                    })
-                }
-            } else {
-                res.send({
-                    code: 1,
-                    success: true,
-                    msg: '账号或密码错误'
-                })
-            }
-        })
-        .catch(err => {
-            res.send({
-                code: 0,
-                success: false,
-                errMsg: '报错，err：' + err
-            })
-        })
 });
 
 module.exports = router;
