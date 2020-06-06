@@ -41,7 +41,6 @@ router.post('/register', (req, res) => {
             }
         })
     }
-    console.log(46, email, password, avatar, nickname, phone);
     if (!email || !password) {
         const captcha = svgCaptcha.create();
         req.session.verificationCode = captcha.text.toLocaleLowerCase();
@@ -89,6 +88,54 @@ router.post('/register', (req, res) => {
         })
         .catch((err) => {
             console.log('用户注册错误：' + err)
+        })
+});
+// 用户登录
+router.post('/login', (req, res) => {
+    const { email, password } = req.body;
+    userModel
+        .findOne({ email })
+        .then((data) => {
+            if (data.password === password) {
+                req.session.userInfo = {
+                    id: data._id,
+                    email: data.email
+                };
+                res.send({
+                    code: 1,
+                    success: true,
+                    msg: '登录成功',
+                    data: {
+                        userInfo: {
+                            id: data._id,
+                            email: data.email
+                        }
+                    }
+                });
+
+                /*if (data.status === 1) {
+
+                } else {
+                    res.send({
+                        code: 1,
+                        success: true,
+                        msg: '登录失败，账号未启用'
+                    })
+                }*/
+            } else {
+                res.send({
+                    code: 1,
+                    success: true,
+                    msg: '账号或密码错误'
+                })
+            }
+        })
+        .catch(err => {
+            res.send({
+                code: 0,
+                success: false,
+                errMsg: '报错，err：' + err
+            })
         })
 });
 

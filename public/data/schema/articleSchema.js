@@ -18,9 +18,12 @@ const articleSchema = new Schema({
         type: String,
         default: '/assert/img/js.jpg'
     },
-    articleTag: {
+    origin: {
         type: String,
         require: true
+    },
+    description: {
+        type: String,
     },
     content: {
         type: String,
@@ -31,11 +34,11 @@ const articleSchema = new Schema({
         default: 0
     },
     comment: [{
-        type: Schema.Types.ObjectID,
+        type: Schema.Types.ObjectId,
         ref: 'comment'
     }],
     author: {
-        type: Schema.Types.ObjectID,
+        type: Schema.Types.ObjectId,
         ref: 'user'
     }
 });

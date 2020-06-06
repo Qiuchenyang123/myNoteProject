@@ -14,24 +14,21 @@ const userSchema = new Schema({
         type: String,
         require: [true, '昵称必须']
     },
-    phone: {
-        type: Number,
-        require: [true, '手机号是必须的']
-    },
     avatar: {
         type: String,
         default: ''
     },
-    nickname: {
+    date: {
         type: String,
         default: '' + Date.now()
     },
     phone: {
         type: Number,
-        match: /^1[2-9]\d{9}/
+        match: /^1[2-9]\d{9}/,
+        require: [true, '手机号是必须的']
     },
     article: [{
-        type: Schema.Types.ObjectID,
+        type: Schema.Types.ObjectId,
         ref: 'article'
     }]
 });
