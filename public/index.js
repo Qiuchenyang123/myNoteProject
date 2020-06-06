@@ -14,12 +14,10 @@ app.listen(23333);
 app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', req.headers.origin);
     res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type');
+    res.header('Access-Control-Allow-Headers', 'x-requested-with,Content-Type');
     res.header('Access-Control-Allow-Credentials','true');
-    console.log(19)
-    res.header('Content-Type', 'multipart/form-data;');
+    // res.header('Content-Type', 'multipart/form-data;');
     // res.header('Content-Type', 'application/json;charset=utf-8;multipart/form-data;');
-    console.log(21)
     next()
 });
 // app.use(cors());

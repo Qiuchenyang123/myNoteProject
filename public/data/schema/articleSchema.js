@@ -16,7 +16,7 @@ const articleSchema = new Schema({
     },
     surface: {
         type: String,
-        default: '/assert/img/js.jpg'
+        default: 'http://localhost:23333/assert/img/js.jpg'
     },
     origin: {
         type: String,

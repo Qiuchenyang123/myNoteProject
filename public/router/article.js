@@ -7,11 +7,13 @@ const articleModel = require("../data/model/article");
 // 设置 multer 存储空间
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, path.join(__dirname, '../assert/img'))
+        cb(null, path.join(__dirname, '../assert/img/surface'))
     },
-    filename(req, file, callback) {
+    filename: function (req, file, callback) {
         const {ext} = path.parse(file.originalname);
-        callback(null, file.fieldname + '-' + Date.now() + '.' + ext)
+        const filename = file.fieldname + '-' + Date.now() + ext;
+        req.session.newSurfaceName = filename;
+        callback(null, filename)
     }
 });
 // 配置 multer
@@ -24,7 +26,7 @@ const myUpload = multer({
         const {ext} = path.parse(file.originalname);
         callback(null, /\.jpg|\.png|\.jpeg|\.gif$/.test(ext))
     }
-}).single('file');
+}).single('surface');
 
 
 router.get('/articleList', (req, res) => {
@@ -49,26 +51,28 @@ router.get('/articleInfo', (req, res) => {
 });
 
 router.post('/articleSurfaceUpload', (req, res) => {
-    console.log(123)
     myUpload(req, res, function (err) {
-        console.log(55, err)
-        debugger
         if (err instanceof multer.MulterError) {
             res.send({
                 code: 0,
                 msg: `multer错误:${err}`
             })
-        } else if(err) {
+        } else if (err) {
             res.send({
                 code: 0,
                 msg: `非multer错误：${err}`
             })
-        } else {
-            res.send({
-                code: 1,
-                msg: `上传成功`
-            })
         }
+  /*      res.writeHead(200, {
+            "Access-Control-Allow-Origin": "*"//允许跨域。。。
+        });*/
+        res.send({
+            code: 1,
+            msg: '上传成功',
+            data: {
+                surfaceUrl: 'http://localhost:23333/assert/img/surface/' + req.session.newSurfaceName
+            }
+        })
     })
 
     // if (req.session.userInfo.id) {
